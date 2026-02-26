@@ -18,12 +18,11 @@ struct Appliance {
 
 void registerAppliance(Appliance arr[], int& count) {
     if (count >= MAX_APPLIANCES) {
-        cout << "Limit reached. Cannot add more.\n";
+        cout << "Limit reached.\n";
         return;
     }
 
     Appliance a;
-
     cout << "Enter appliance name: ";
     getline(cin, a.name);
 
@@ -33,8 +32,7 @@ void registerAppliance(Appliance arr[], int& count) {
     cout << "Enter daily usage hours: ";
     cin >> a.hours;
 
-    cin.ignore(10000, '\n'); // clear leftover newline
-
+    cin.ignore(10000, '\n'); // clear newline
     arr[count] = a;
     count++;
 
@@ -48,20 +46,32 @@ void viewAppliances(const Appliance arr[], int count) {
     }
 
     cout << fixed << setprecision(2);
-    cout << "\n#   " << left << setw(20) << "Name"
-         << setw(10) << "Watts"
-         << setw(10) << "Hours"
-         << setw(10) << "kWh/day" << "\n";
-    cout << "---------------------------------------------\n";
-
+    cout << "\n#  Name                Watts      Hours      kWh/day\n";
+    cout << "----------------------------------------------------\n";
     for (int i = 0; i < count; i++) {
-        cout << setw(4) << (i + 1)
-             << setw(20) << arr[i].name
-             << setw(10) << arr[i].watts
-             << setw(10) << arr[i].hours
-             << setw(10) << arr[i].dailyKwh()
-             << "\n";
+        cout << (i + 1) << ". " << arr[i].name
+             << " | " << arr[i].watts
+             << " | " << arr[i].hours
+             << " | " << arr[i].dailyKwh() << "\n";
     }
+}
+
+// ---- NEW in Part 3: total daily energy calculation ----
+double totalDailyKwh(const Appliance arr[], int count) {
+    double total = 0.0;
+    for (int i = 0; i < count; i++) {
+        total += arr[i].dailyKwh();
+    }
+    return total;
+}
+
+void showTotalLoad(const Appliance arr[], int count) {
+    if (count == 0) {
+        cout << "No appliances registered yet.\n";
+        return;
+    }
+    cout << fixed << setprecision(2);
+    cout << "Total daily load = " << totalDailyKwh(arr, count) << " kWh\n";
 }
 
 int main() {
@@ -72,23 +82,19 @@ int main() {
         cout << "\n=== MENU ===\n";
         cout << "1. Register appliance\n";
         cout << "2. View appliances\n";
-        cout << "3. Exit\n";
+        cout << "3. Show total daily load (kWh)\n";
+        cout << "4. Exit\n";
+        cout << "Choose: ";
 
         int choice;
-        cout << "Choose: ";
         cin >> choice;
-        cin.ignore(10000, '\n'); // clear newline
+        cin.ignore(10000, '\n');
 
-        if (choice == 1) {
-            registerAppliance(appliances, count);
-        } else if (choice == 2) {
-            viewAppliances(appliances, count);
-        } else if (choice == 3) {
-            cout << "Goodbye!\n";
-            break;
-        } else {
-            cout << "Invalid choice.\n";
-        }
+        if (choice == 1) registerAppliance(appliances, count);
+        else if (choice == 2) viewAppliances(appliances, count);
+        else if (choice == 3) showTotalLoad(appliances, count);
+        else if (choice == 4) { cout << "Goodbye!\n"; break; }
+        else cout << "Invalid choice.\n";
     }
 
     return 0;
