@@ -13,9 +13,7 @@ struct Appliance {
     double watts;
     double hours;
 
-    double dailyKwh() const {
-        return (watts / 1000.0) * hours;
-    }
+    double dailyKwh() const { return (watts / 1000.0) * hours; }
 };
 
 string trim(string s) {
@@ -24,22 +22,25 @@ string trim(string s) {
     return s;
 }
 
+string lowerStr(string s) {
+    for (int i = 0; i < (int)s.size(); i++) {
+        if (s[i] >= 'A' && s[i] <= 'Z') s[i] = char(s[i] - 'A' + 'a');
+    }
+    return s;
+}
+
 void saveAppliances(const Appliance arr[], int count) {
     ofstream out(APPLIANCES_FILE.c_str());
-    if (!out.is_open()) {
-        cout << "Error: could not write " << APPLIANCES_FILE << "\n";
-        return;
-    }
-    for (int i = 0; i < count; i++) {
+    if (!out.is_open()) { cout << "Error: could not write " << APPLIANCES_FILE << "\n"; return; }
+    for (int i = 0; i < count; i++)
         out << arr[i].name << "|" << arr[i].watts << "|" << arr[i].hours << "\n";
-    }
     out.close();
 }
 
 void loadAppliances(Appliance arr[], int& count) {
     count = 0;
     ifstream in(APPLIANCES_FILE.c_str());
-    if (!in.is_open()) return; // first run ok
+    if (!in.is_open()) return;
 
     string line;
     while (getline(in, line)) {
@@ -88,9 +89,9 @@ void registerAppliance(Appliance arr[], int& count) {
     cout << "Enter daily usage hours: ";
     cin >> a.hours;
 
-    cin.ignore(10000, '\n'); // clear newline
-
+    cin.ignore(10000, '\n');
     arr[count++] = a;
+
     saveAppliances(arr, count);
     cout << "Appliance added and saved.\n";
 }
@@ -115,6 +116,30 @@ void showTotalLoad(const Appliance arr[], int count) {
     cout << "Total daily load = " << totalDailyKwh(arr, count) << " kWh\n";
 }
 
+// --- NEW in Part 5: search ---
+void searchAppliance(const Appliance arr[], int count) {
+    if (count == 0) { cout << "No appliances registered yet.\n"; return; }
+
+    string q;
+    cout << "Enter name to search: ";
+    getline(cin, q);
+
+    q = lowerStr(trim(q));
+    bool found = false;
+
+    cout << fixed << setprecision(2);
+    for (int i = 0; i < count; i++) {
+        if (lowerStr(arr[i].name).find(q) != string::npos) {
+            cout << "- " << arr[i].name
+                 << " | " << arr[i].watts << " W"
+                 << " | " << arr[i].hours << " hrs/day"
+                 << " | " << arr[i].dailyKwh() << " kWh/day\n";
+            found = true;
+        }
+    }
+    if (!found) cout << "No match found.\n";
+}
+
 int main() {
     Appliance appliances[MAX_APPLIANCES];
     int count = 0;
@@ -126,9 +151,10 @@ int main() {
         cout << "\n=== MENU ===\n";
         cout << "1. Register appliance\n";
         cout << "2. View appliances\n";
-        cout << "3. Show total daily load (kWh)\n";
-        cout << "4. Save appliances to file\n";
-        cout << "5. Exit\n";
+        cout << "3. Search appliance by name\n";
+        cout << "4. Show total daily load (kWh)\n";
+        cout << "5. Save appliances to file\n";
+        cout << "6. Exit\n";
         cout << "Choose: ";
 
         int choice;
@@ -137,9 +163,10 @@ int main() {
 
         if (choice == 1) registerAppliance(appliances, count);
         else if (choice == 2) viewAppliances(appliances, count);
-        else if (choice == 3) showTotalLoad(appliances, count);
-        else if (choice == 4) { saveAppliances(appliances, count); cout << "Saved.\n"; }
-        else if (choice == 5) { saveAppliances(appliances, count); cout << "Goodbye!\n"; break; }
+        else if (choice == 3) searchAppliance(appliances, count);
+        else if (choice == 4) showTotalLoad(appliances, count);
+        else if (choice == 5) { saveAppliances(appliances, count); cout << "Saved.\n"; }
+        else if (choice == 6) { saveAppliances(appliances, count); cout << "Goodbye!\n"; break; }
         else cout << "Invalid choice.\n";
     }
     return 0;
